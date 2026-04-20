@@ -17,18 +17,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装 Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
+# 使用旧版本 Miniconda 安装脚本以彻底避开最新版的 TOS 强制验证策略
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.11.0-2-Linux-x86_64.sh -O miniconda.sh \
     && bash miniconda.sh -b -p /opt/miniconda3 \
     && rm miniconda.sh \
     && conda config --set auto_activate_base false \
-    && conda config --set solver libmamba \
-    && conda config --set channel_priority strict \
     && conda config --set show_channel_urls true \
     && conda config --set always_yes yes \
     && conda init bash \
     && conda clean -a -y
 
-# 将 conda-forge 设为唯一渠道以避免 TOS 检查
+# 将 conda-forge 设为默认渠道
 RUN conda config --add channels conda-forge \
     && conda config --set channel_priority strict \
     && conda config --remove channels defaults || true
