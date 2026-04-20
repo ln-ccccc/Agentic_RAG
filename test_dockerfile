@@ -1,0 +1,21 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/opt/miniconda3/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y wget bzip2 ca-certificates && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
+    && bash miniconda.sh -b -p /opt/miniconda3 \
+    && rm miniconda.sh \
+    && conda config --set auto_activate_base false \
+    && conda config --set show_channel_urls true \
+    && conda config --set always_yes yes
+
+# 尝试修复 TOS 问题
+# conda tos accept 命令在某些老版本中可能不支持，直接使用 conda-forge 频道替换 main 频道可以完全避开 Anaconda 官方频道的 TOS 限制
+RUN conda config --add channels conda-forge \
+    && conda config --remove channels defaults || true \
+    && conda config --set channel_priority strict
+
+RUN conda create -n test_env python=3.11 -y
