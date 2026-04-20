@@ -26,24 +26,27 @@ huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
 huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker-v2-m3
 ```
 
-### 1.3 启动本地 LLM 服务 (vLLM)
-AgenticRAG 的核心大脑是 LLM。项目通过 OpenAI 兼容接口调用模型，推荐在本地使用 vLLM 拉起一个较小参数的模型（如 Qwen3-4B）进行测试：
+### 1.3 配置云端 LLM API (替代本地部署)
+AgenticRAG 的核心大脑是大语言模型（LLM）。虽然项目支持通过 vLLM 在本地部署模型，但如果你在 WSL2/Windows 环境下只做推理测试，**最简单且最推荐的方式是直接调用云端大模型 API**（如 DeepSeek、通义千问或 OpenAI）。
+
+你无需运行任何复杂的本地服务，只需要在你的 WSL2 终端中配置以下环境变量，告诉系统 API 的地址和密钥：
+
 ```bash
-# 在一个新终端中运行
-python -m vllm.entrypoints.openai.api_server \
-    --model Qwen/Qwen3-4B \
-    --served-model-name Qwen3-4B \
-    --port 9097 \
-    --gpu-memory-utilization 0.45 \
-    --max-model-len 32768
-```
-随后，在你的主终端中配置环境变量，告诉系统 LLM 在哪里：
-```bash
-export VLLM_BASE_URL="http://localhost:9097/v1"
-export AGENT_LLM_MODEL="Qwen3-4B"
+# 设置大模型名称（以 DeepSeek 为例）
+export AGENT_LLM_MODEL="deepseek-chat"
+
+# 设置你的真实 API Key
+export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# 设置 API 地址（注意需要带上 /v1 后缀，以兼容 OpenAI 协议）
+export VLLM_BASE_URL="https://api.deepseek.com/v1"
+
+# 其他配置
 export MODEL_HUB="./models"
 export PROMPT_LANG="zh"
 ```
+
+*提示：如果你使用的是其他 API（如通义千问），只需将 `VLLM_BASE_URL` 改为 `https://dashscope.aliyuncs.com/compatible-mode/v1`，并将 `AGENT_LLM_MODEL` 改为对应的模型名（如 `qwen-plus`）即可。*
 
 ---
 

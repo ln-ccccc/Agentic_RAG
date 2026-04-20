@@ -96,35 +96,26 @@ huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker
 
 ### 3. 配置模型 API
 
-所有 LLM 调用统一通过 OpenAI 兼容协议（`llm/client.py`），支持本地 vLLM 和任意云端 API。
+所有 LLM 调用统一通过 OpenAI 兼容协议（`llm/client.py`），支持任意云端 API 或本地 vLLM。
+由于 WSL2 环境下显存限制或依赖问题，**推荐直接使用云端 API 进行推理测试**。
 
-**本地 vLLM 部署**（推荐）：
+**环境变量配置（以 DeepSeek API 为例）**：
 ```bash
-python -m vllm.entrypoints.openai.api_server \
-    --model Qwen/Qwen3-4B \
-    --served-model-name Qwen3-4B \
-    --port 9097 \
-    --gpu-memory-utilization 0.45 \
-    --max-model-len 32768
-```
-
-**环境变量配置**：
-```bash
-# 本地 vLLM 地址
-export VLLM_BASE_URL="http://localhost:9097/v1"     # Agent 推理模型
+# Agent 推理模型配置
+export AGENT_LLM_MODEL="deepseek-chat"
+export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+export VLLM_BASE_URL="https://api.deepseek.com/v1"
 
 # 模型和检索配置
 export MODEL_HUB="./models"
-export AGENT_LLM_MODEL="Qwen3-4B"
 export PROMPT_LANG="zh"
 
-# Judge 模型（评测 + GRPO reward 中的 LLM 评分）
-# 方案 A: 本地 vLLM 部署
-export JUDGE_BASE_URL="http://localhost:8086/v1"
-export JUDGE_LLM_MODEL="gpt-oss-120b"
-# 方案 B: 云端 API（推荐）— 在 llm/client.py 中注册模型后使用
-# export JUDGE_LLM_MODEL="gpt-4o-judge"
+# Judge 模型（评测 + GRPO reward 中的 LLM 评分，同样可使用云端 API）
+export JUDGE_BASE_URL="https://api.deepseek.com/v1"
+export JUDGE_LLM_MODEL="deepseek-chat"
 ```
+
+*注：如果您仍需要使用本地 vLLM 部署，可通过 `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen3-4B --port 9097` 拉起服务，并将 `VLLM_BASE_URL` 指向 `http://localhost:9097/v1`。*
 
 **添加自定义模型**（本地或云端均可）：在 `llm/client.py` 的 `MODEL_CONFIGS` 中新增条目：
 ```python
