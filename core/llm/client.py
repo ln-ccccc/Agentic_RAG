@@ -92,6 +92,23 @@ MODEL_CONFIGS: Dict[str, ModelConfig] = {
     ),
 }
 
+# 自动注册从环境变量读取的模型
+if AGENT_LLM_MODEL not in MODEL_CONFIGS:
+    MODEL_CONFIGS[AGENT_LLM_MODEL] = ModelConfig(
+        url=VLLM_BASE_URL,
+        model_name=AGENT_LLM_MODEL,
+        api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"),
+        max_len=131072,
+    )
+
+if JUDGE_LLM_MODEL not in MODEL_CONFIGS:
+    MODEL_CONFIGS[JUDGE_LLM_MODEL] = ModelConfig(
+        url=JUDGE_BASE_URL,
+        model_name=JUDGE_LLM_MODEL,
+        api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"),
+        max_len=131072,
+    )
+
 
 # ══════════════════════════════════════════════════════════════════
 # 统计
