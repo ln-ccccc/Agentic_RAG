@@ -28,13 +28,10 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     && conda init bash \
     && conda clean -a -y
 
-# 跳过 Anaconda 的 Terms of Service 检查，并优先使用 conda-forge 避免 TOS 阻拦
+# 将 conda-forge 设为唯一渠道以避免 TOS 检查
 RUN conda config --add channels conda-forge \
     && conda config --set channel_priority strict \
-    && conda config --remove channels defaults || true \
-    && conda config --set default_channels "conda-forge" \
-    && (conda tos accept --override-channels --channel "https://repo.anaconda.com/pkgs/main" || true) \
-    && (conda tos accept --override-channels --channel "https://repo.anaconda.com/pkgs/r" || true)
+    && conda config --remove channels defaults || true
 
 # 设置工作目录
 WORKDIR /workspace/core
