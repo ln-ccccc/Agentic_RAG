@@ -20,8 +20,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
     && bash miniconda.sh -b -p /opt/miniconda3 \
     && rm miniconda.sh \
+    && conda config --set auto_activate_base false \
+    && conda config --set solver libmamba \
+    && conda config --set channel_priority strict \
+    && conda config --set show_channel_urls true \
+    && conda config --set always_yes yes \
     && conda init bash \
     && conda clean -a -y
+
+# 跳过 Anaconda 的 Terms of Service 检查 (最新版 Conda 在非交互模式下要求的配置)
+RUN conda config --set default_channels "https://repo.anaconda.com/pkgs/main" \
+    && conda tos accept --override-channels --channel "https://repo.anaconda.com/pkgs/main" \
+    && conda tos accept --override-channels --channel "https://repo.anaconda.com/pkgs/r" || true
 
 # 设置工作目录
 WORKDIR /workspace/core
