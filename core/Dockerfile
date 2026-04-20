@@ -6,6 +6,10 @@ ENV PATH="/opt/miniconda3/bin:${PATH}"
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
+# 配置 Ubuntu APT 国内源 (阿里云)
+RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list \
+    && sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
+
 # 安装基础系统依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
@@ -16,9 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Miniconda
-# 使用旧版本 Miniconda 安装脚本以彻底避开最新版的 TOS 强制验证策略
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.11.0-2-Linux-x86_64.sh -O miniconda.sh \
+# 安装 Miniconda (使用清华源加速下载)
+RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py310_23.11.0-2-Linux-x86_64.sh -O miniconda.sh \
     && bash miniconda.sh -b -p /opt/miniconda3 \
     && rm miniconda.sh \
     && conda config --set auto_activate_base false \
@@ -27,10 +30,15 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.11.0-2-Linux-x8
     && conda init bash \
     && conda clean -a -y
 
-# 将 conda-forge 设为默认渠道
-RUN conda config --add channels conda-forge \
+# 配置 Conda 国内源 (清华源)
+RUN conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ \
     && conda config --set channel_priority strict \
     && conda config --remove channels defaults || true
+
+# 配置 PIP 国内源 (清华源)
+RUN /opt/miniconda3/bin/pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 设置工作目录
 WORKDIR /workspace/core
