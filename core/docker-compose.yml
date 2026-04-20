@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  agenticrag-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: agenticrag:latest
+    container_name: agenticrag_env
+    # 启用 GPU 支持
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # 映射本地的 core 目录到容器的 /workspace/core，方便代码修改后立即生效
+    volumes:
+      - .:/workspace/core
+      # （可选）将宿主机的 HuggingFace 模型缓存映射进去，避免重复下载
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    # 将容器的网络与宿主机打通，方便调试本地 vLLM 端口
+    network_mode: host
+    # 预设基础环境变量（推荐使用云端 API 跑通测试）
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - AGENT_LLM_MODEL=deepseek-chat
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-""}
+      - VLLM_BASE_URL=https://api.deepseek.com/v1
+      - MODEL_HUB=./models
+      - PROMPT_LANG=zh
+    # 开启交互式终端
+    stdin_open: true
+    tty: true
+    command: /bin/bash
