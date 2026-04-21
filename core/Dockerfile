@@ -6,8 +6,10 @@ ENV PATH="/opt/miniconda3/bin:${PATH}"
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-# 安装基础系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 安装基础系统依赖 (配置阿里云 apt 源)
+RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
     wget \
     git \
     curl \
@@ -16,10 +18,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
+# 安装 Miniconda (配置清华 conda 源和阿里云 pip 源)
+RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
     && bash miniconda.sh -b -p /opt/miniconda3 \
     && rm miniconda.sh \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ \
+    && conda config --set show_channel_urls yes \
+    && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
     && conda init bash \
     && conda clean -a -y
 

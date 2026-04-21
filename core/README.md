@@ -90,6 +90,10 @@ pip install -r requirements-verl.txt
 下载 BGE-M3 和 BGE-Reranker-v2-m3 到 `models/` 目录：
 ```bash
 mkdir -p models
+
+# 开启 HuggingFace 国内镜像源 (国内网络必选)
+export HF_ENDPOINT=https://hf-mirror.com
+
 huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
 huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker-v2-m3
 ```

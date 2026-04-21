@@ -72,6 +72,9 @@ pip install -r requirements-verl.txt
 ```bash
 mkdir -p models
 
+# 开启 HuggingFace 国内镜像源 (国内网络必选)
+export HF_ENDPOINT=https://hf-mirror.com
+
 # 1. 下载 BGE 检索模型（必选）
 huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
 huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker-v2-m3
