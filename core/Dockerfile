@@ -22,11 +22,15 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list && 
 RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
     && bash miniconda.sh -b -p /opt/miniconda3 \
     && rm miniconda.sh \
-    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
-    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ \
     && conda config --set show_channel_urls yes \
     && conda config --set channel_priority strict \
     && conda config --remove channels defaults || true \
+    && conda config --remove-key default_channels || true \
+    && conda config --add default_channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main \
+    && conda config --add default_channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r \
+    && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free \
     && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
     && conda init bash \
     && conda clean -a -y
@@ -40,7 +44,10 @@ COPY requirements.txt requirements-verl.txt ./
 # ---------------------------------------------------------
 # 环境 1: agenticrag (推理、评测、数据合成与 SFT)
 # ---------------------------------------------------------
-RUN conda create -n agenticrag python=3.11 -y && \
+RUN conda create -n agenticrag python=3.11 -y --override-channels \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free && \
     conda run -n agenticrag pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
     conda run -n agenticrag pip install -r requirements.txt && \
     conda clean -a -y
@@ -48,7 +55,10 @@ RUN conda create -n agenticrag python=3.11 -y && \
 # ---------------------------------------------------------
 # 环境 2: verl (GRPO 强化学习专属)
 # ---------------------------------------------------------
-RUN conda create -n verl python=3.12 -y && \
+RUN conda create -n verl python=3.12 -y --override-channels \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r \
+        -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free && \
     # 使用符合项目的 torch 版本
     conda run -n verl pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu124 || \
     conda run -n verl pip install torch --index-url https://download.pytorch.org/whl/cu124 && \
