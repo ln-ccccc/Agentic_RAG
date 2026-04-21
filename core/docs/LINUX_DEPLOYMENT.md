@@ -67,23 +67,23 @@ pip install -r requirements-verl.txt
 在 Linux 服务器上，我们强烈推荐使用 **vLLM** 部署本地开源大模型（如 Qwen 系列或 DeepSeek 系列），这能提供最高的推理吞吐量，且不会产生 API 调用费用。
 
 ### 3.1 下载模型权重
-推荐使用 `huggingface-cli` 或 `modelscope` 将大模型和检索小模型下载到服务器的 SSD 硬盘上。
+由于国内网络访问 HuggingFace 经常受限，强烈推荐使用 **ModelScope (阿里魔搭社区)** 将大模型和检索小模型下载到服务器的 SSD 硬盘上。
 
 ```bash
 mkdir -p models
 
-# 开启 HuggingFace 国内镜像源 (国内网络必选)
-export HF_ENDPOINT=https://hf-mirror.com
+# 1. 安装魔搭下载工具
+pip install modelscope
 
-# 1. 下载 BGE 检索模型（必选）
-huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
-huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker-v2-m3
+# 2. 极速下载 BGE 检索模型（必选）
+python -c "
+from modelscope import snapshot_download
+snapshot_download('Xorbits/bge-m3', cache_dir='models/bge-m3-cache', local_dir='models/bge-m3')
+snapshot_download('AI-ModelScope/bge-reranker-v2-m3', cache_dir='models/bge-reranker-v2-m3-cache', local_dir='models/bge-reranker-v2-m3')
+"
 
-# 2. 下载用于推理的 LLM 基座（以 Qwen3-4B 为例）
-huggingface-cli download Qwen/Qwen3-4B --local-dir models/Qwen3-4B
-
-# 3. (可选) 下载更强力的 LLM 作为 Judge 裁判模型
-huggingface-cli download Qwen/Qwen3-32B --local-dir models/Qwen3-32B
+# 3. 下载用于推理的 LLM 基座（以 Qwen2.5-7B 为例）
+python -c "from modelscope import snapshot_download; snapshot_download('qwen/Qwen2.5-7B-Instruct', local_dir='models/Qwen2.5-7B-Instruct')"
 ```
 
 ### 3.2 使用 vLLM 拉起服务

@@ -87,15 +87,28 @@ pip install -r requirements-verl.txt
 
 ### 2. 模型准备
 
-下载 BGE-M3 和 BGE-Reranker-v2-m3 到 `models/` 目录：
+下载 BGE-M3 和 BGE-Reranker-v2-m3 到 `models/` 目录。
+由于 HuggingFace 国内经常限流或封锁，**强烈推荐使用阿里魔搭社区 (ModelScope)** 极速下载：
+
 ```bash
 mkdir -p models
 
-# 开启 HuggingFace 国内镜像源 (国内网络必选)
-export HF_ENDPOINT=https://hf-mirror.com
+# 安装魔搭下载工具
+pip install modelscope
 
-huggingface-cli download BAAI/bge-m3 --local-dir models/bge-m3
-huggingface-cli download BAAI/bge-reranker-v2-m3 --local-dir models/bge-reranker-v2-m3
+# 使用 Python 脚本极速下载模型
+python -c "
+from modelscope import snapshot_download
+import os
+
+print('开始下载 bge-m3...')
+snapshot_download('Xorbits/bge-m3', cache_dir='models/bge-m3-cache', local_dir='models/bge-m3')
+
+print('\n开始下载 bge-reranker-v2-m3...')
+snapshot_download('AI-ModelScope/bge-reranker-v2-m3', cache_dir='models/bge-reranker-v2-m3-cache', local_dir='models/bge-reranker-v2-m3')
+
+print('\n全部下载完成！')
+"
 ```
 
 ### 3. 配置模型 API
