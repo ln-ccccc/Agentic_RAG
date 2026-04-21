@@ -195,7 +195,11 @@ def get_from_llm(
 
     temperature = kwargs.get("temperature", config.temperature)
     top_p = kwargs.get("top_p", config.top_p)
+    
+    # 兼容部分 API 对 max_tokens 上限的严格限制（如 Gemini/Vertex AI 最高支持 8192）
+    # 动态限制 max_tokens 不超过 8192 避免 400 报错
     max_tokens = kwargs.get("max_len", kwargs.get("max_tokens", config.max_len))
+    max_tokens = min(max_tokens, 8192)
 
     logger.info(f"Requesting {model_name} at {config.url}")
 
