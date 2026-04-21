@@ -78,17 +78,17 @@ MODEL_CONFIGS: Dict[str, ModelConfig] = {
     "Qwen3-4B": ModelConfig(
         url=VLLM_BASE_URL,
         model_name="Qwen3-4B",
-        max_len=32768,
+        max_len=8192,
     ),
     "Qwen3-32B": ModelConfig(
         url=VLLM_32B_URL,
         model_name="Qwen/Qwen3-32B",
-        max_len=131072,
+        max_len=8192,
     ),
     "gpt-oss-120b": ModelConfig(
         url=JUDGE_BASE_URL,
         model_name="gpt-oss-120b",
-        max_len=131072,
+        max_len=8192,
     ),
 }
 
@@ -98,7 +98,7 @@ if AGENT_LLM_MODEL not in MODEL_CONFIGS:
         url=VLLM_BASE_URL,
         model_name=AGENT_LLM_MODEL,
         api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"),
-        max_len=131072,
+        max_len=8192,
     )
 
 if JUDGE_LLM_MODEL not in MODEL_CONFIGS:
@@ -106,7 +106,7 @@ if JUDGE_LLM_MODEL not in MODEL_CONFIGS:
         url=JUDGE_BASE_URL,
         model_name=JUDGE_LLM_MODEL,
         api_key=os.environ.get("OPENAI_API_KEY", "EMPTY"),
-        max_len=131072,
+        max_len=8192,
     )
 
 
@@ -201,18 +201,34 @@ def get_from_llm(
 
     for attempt in range(config.retry_attempts):
         try:
-            resp = config.client.chat.completions.create(
-                model=config.model_name,
-                messages=formatted,
-                temperature=temperature,
-                top_p=top_p,
-                max_tokens=max_tokens,
-                extra_body={
-                    "chat_template_kwargs": {"enable_thinking": config.think_bool},
-                    "top_k": config.top_k,
-                    "min_p": config.min_p,
-                },
-            )
+            # 兼容不同厂商的 API (去除部分非标准参数)
+            extra_body = {}
+            if config.think_bool:
+                extra_body["chat_template_kwargs"] = {"enable_thinking": True}
+            
+            # 只在指定时传递
+            if config.top_k != 20:
+                extra_body["top_k"] = config.top_k
+            if config.min_p != 0:
+                extra_body["min_p"] = config.min_p
+
+            # max_tokens 是 OpenAI 兼容参数，但有些模型可能不支持过大的值
+            kwargs_for_api = {
+                "model": config.model_name,
+                "messages": formatted,
+                "temperature": temperature,
+                "top_p": top_p,
+            }
+            # 动态调整 max_tokens，避免超出模型上限
+            if max_tokens and max_tokens > 8192:
+                kwargs_for_api["max_tokens"] = 8192
+            elif max_tokens:
+                kwargs_for_api["max_tokens"] = max_tokens
+
+            if extra_body:
+                kwargs_for_api["extra_body"] = extra_body
+
+            resp = config.client.chat.completions.create(**kwargs_for_api)
             text = resp.choices[0].message.content
             if text:
                 return _strip_think(text)

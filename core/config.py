@@ -15,13 +15,13 @@ RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 TMP_DIR = os.path.join(PROJECT_ROOT, "tmp")
 
 # Agent 推理模型（环境变量覆盖）
-AGENT_LLM_MODEL = os.environ.get("AGENT_LLM_MODEL", "Qwen3-32B")
+AGENT_LLM_MODEL = os.environ.get("AGENT_LLM_MODEL", "gemini-2.5-flash")
 # Prompt 语言：en / zh
 PROMPT_LANG = os.environ.get("PROMPT_LANG", "zh")
 # 评测 Judge 用
-JUDGE_LLM_MODEL = os.environ.get("JUDGE_LLM_MODEL", "gpt-oss-120b")
+JUDGE_LLM_MODEL = os.environ.get("JUDGE_LLM_MODEL", "gemini-2.5-flash")
 # 数据合成用
-SYNTH_LLM_MODEL = os.environ.get("SYNTH_LLM_MODEL", "gpt-oss-120b")
+SYNTH_LLM_MODEL = os.environ.get("SYNTH_LLM_MODEL", "gemini-2.5-flash")
 
 # 检索参数
 RERANK_TOP_K = 5
