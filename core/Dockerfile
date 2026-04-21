@@ -25,6 +25,8 @@ RUN wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-late
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ \
     && conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ \
     && conda config --set show_channel_urls yes \
+    && conda config --set channel_priority strict \
+    && conda config --remove channels defaults || true \
     && pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
     && conda init bash \
     && conda clean -a -y
