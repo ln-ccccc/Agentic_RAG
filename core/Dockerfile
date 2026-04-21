@@ -64,13 +64,17 @@ RUN conda create -n verl python=3.12 -y && \
     conda run -n verl pip install -r requirements-verl.txt && \
     conda clean -a -y
 
-# 将代码拷贝进容器（注：在使用 docker-compose 时，这层会被本地挂载覆盖，从而实现代码热更新）
+# 将代码拷贝进容器
 COPY . .
 
 # 尝试安装子模块 LLaMA-Factory (SFT) 和 verl (RL)
-# 如果子模块文件夹存在则执行安装，以支持本地直接构建
-RUN if [ -d "LLaMA-Factory" ]; then conda run -n agenticrag pip install -e ./LLaMA-Factory[metrics]; fi
-RUN if [ -d "verl" ]; then conda run -n verl pip install -e ./verl; fi
+# 注意：LLaMA-Factory 安装时需要读取其自己目录下的 README.md 等文件
+RUN if [ -d "LLaMA-Factory" ] && [ -f "LLaMA-Factory/setup.py" ]; then \
+        cd LLaMA-Factory && conda run -n agenticrag pip install -e .[metrics] && cd ..; \
+    fi
+RUN if [ -d "verl" ] && [ -f "verl/setup.py" ]; then \
+        cd verl && conda run -n verl pip install -e . && cd ..; \
+    fi
 
 # 默认进入 bash，并激活基础的 agenticrag 环境
 RUN echo "conda activate agenticrag" >> ~/.bashrc
