@@ -69,18 +69,35 @@ core/
 
 ### 1. 环境准备
 
+**选项 A: Docker 部署 (推荐)**
+项目已经配置好了完全兼容国内网络环境的 Dockerfile，一行命令即可拉起所有依赖环境：
+```bash
+# 构建并后台启动容器
+docker-compose up -d --build
+
+# 进入容器内部
+docker exec -it agenticrag_env bash
+
+# (可选) 进入容器后，可以配置中转 API 的环境变量
+export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+export VLLM_BASE_URL="https://api.proxy.com/v1"
+export AGENT_LLM_MODEL="deepseek-chat"
+```
+
+**选项 B: 手动 Conda 部署**
+如果你希望在宿主机上进行手动部署：
 ```bash
 # 环境 1: agenticrag（推理/评测/数据合成/SFT）
-conda create -n agenticrag python=3.11
+conda create -n agenticrag python=3.11 -y --override-channels -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
 conda activate agenticrag
-pip install torch --index-url https://download.pytorch.org/whl/cu128
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 pip install -r requirements.txt
-# SFT 训练额外安装：cd LLaMA-Factory && pip install -e .
+# SFT 训练额外安装：cd LLaMA-Factory && pip install -e .[metrics]
 
 # 环境 2: verl（GRPO 训练，与 agenticrag 严格隔离）
-conda create -n verl python=3.12
+conda create -n verl python=3.12 -y --override-channels -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
 conda activate verl
-pip install torch --index-url https://download.pytorch.org/whl/cu128
+pip install torch --index-url https://download.pytorch.org/whl/cu124
 cd verl && pip install -e . && cd ..
 pip install -r requirements-verl.txt
 ```

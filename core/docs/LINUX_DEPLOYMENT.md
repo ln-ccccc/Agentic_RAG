@@ -23,13 +23,21 @@
 ### 2.1 创建 AgenticRAG 环境 (用于推理、数据合成与 SFT)
 此环境主要负责日常的 RAG 检索、Agent 编排执行、基于 vLLM 的本地推理，以及调用 LLaMA-Factory 进行微调。
 
+> **推荐：** 你也可以直接使用项目根目录下的 `docker-compose.yml` 来免配置一键拉起 Docker 容器：
+> ```bash
+> docker-compose up -d --build
+> docker exec -it agenticrag_env bash
+> ```
+> 进入容器后即可跳过下面的环境创建步骤。
+
+**如果是手动部署：**
 ```bash
-# 1. 创建环境
-conda create -n agenticrag python=3.11 -y
+# 1. 创建环境 (配置清华源并绕过 ToS 报错)
+conda create -n agenticrag python=3.11 -y --override-channels -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
 conda activate agenticrag
 
 # 2. 安装与 CUDA 12.x 兼容的 PyTorch
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
 # 3. 安装项目主依赖（包含了 vLLM、Faiss、Datasets 等）
 pip install -r requirements.txt
@@ -44,8 +52,8 @@ cd ..
 `verl` 是一个专门用于 LLM 强化学习的框架，对底层的分布式训练库（如 DeepSpeed、Megatron 等）依赖极深，因此必须独立建环。
 
 ```bash
-# 1. 创建独立环境 (推荐 Python 3.12)
-conda create -n verl python=3.12 -y
+# 1. 创建独立环境 (推荐 Python 3.12，配置清华源并绕过 ToS 报错)
+conda create -n verl python=3.12 -y --override-channels -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free
 conda activate verl
 
 # 2. 安装特定版本的 PyTorch (verl 推荐 2.8.0 或更高版本)
