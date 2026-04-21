@@ -72,16 +72,19 @@ core/
 **选项 A: Docker 部署 (推荐)**
 项目已经配置好了完全兼容国内网络环境的 Dockerfile，一行命令即可拉起所有依赖环境：
 ```bash
-# 构建并后台启动容器
+# 1. 构建并后台启动容器
 docker-compose up -d --build
 
-# 进入容器内部
+# 2. 进入容器内部（后续的所有配置和运行操作都必须在容器内执行）
 docker exec -it agenticrag_env bash
 
-# (可选) 进入容器后，可以配置中转 API 的环境变量
-export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
-export VLLM_BASE_URL="https://api.proxy.com/v1"
-export AGENT_LLM_MODEL="deepseek-chat"
+# 3. (可选) 进入容器后，配置你的本地/中转大模型 API 环境变量
+# 注意：Ollama 等本地模型无需填写真实的 API_KEY
+export OPENAI_API_KEY="EMPTY"
+export VLLM_BASE_URL="http://192.168.1.109:11434/v1"
+export AGENT_LLM_MODEL="qwen2.5:7b"
+export JUDGE_BASE_URL="http://192.168.1.109:11434/v1"
+export JUDGE_LLM_MODEL="qwen2.5:7b"
 ```
 
 **选项 B: 手动 Conda 部署**
@@ -130,23 +133,27 @@ print('\n全部下载完成！')
 
 ### 3. 配置模型 API
 
-所有 LLM 调用统一通过 OpenAI 兼容协议（`llm/client.py`），支持任意云端 API 或本地 vLLM。
-由于 WSL2 环境下显存限制或依赖问题，**推荐直接使用云端 API 进行推理测试**。
+所有 LLM 调用统一通过 OpenAI 兼容协议（`llm/client.py`），支持任意云端 API 或本地 vLLM/Ollama。
+由于 WSL2 环境下显存限制或依赖问题，**推荐直接使用云端 API 或外部主机的 Ollama 节点进行推理测试**。
 
-**环境变量配置（以 DeepSeek API 为例）**：
+**环境变量配置示例（以本地 Ollama 服务为例）**：
 ```bash
-# Agent 推理模型配置
-export AGENT_LLM_MODEL="deepseek-chat"
-export OPENAI_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
-export VLLM_BASE_URL="https://api.deepseek.com/v1"
+# 务必在 Docker 容器内部执行 (前缀为 root@xxxx:/workspace/core#)
 
-# 模型和检索配置
+# 1. 你的 API 密钥 (Ollama 可填 EMPTY，中转 API 需填真实 key)
+export OPENAI_API_KEY="EMPTY"
+
+# 2. Agent 推理模型配置
+export VLLM_BASE_URL="http://192.168.1.109:11434/v1"
+export AGENT_LLM_MODEL="qwen2.5:7b" # 替换为你通过 ollama list 看到的模型名
+
+# 3. Judge 模型配置 (评测 + GRPO reward 中的 LLM 评分)
+export JUDGE_BASE_URL="http://192.168.1.109:11434/v1"
+export JUDGE_LLM_MODEL="qwen2.5:7b"
+
+# 模型和检索其他配置
 export MODEL_HUB="./models"
 export PROMPT_LANG="zh"
-
-# Judge 模型（评测 + GRPO reward 中的 LLM 评分，同样可使用云端 API）
-export JUDGE_BASE_URL="https://api.deepseek.com/v1"
-export JUDGE_LLM_MODEL="deepseek-chat"
 ```
 
 *注：如果您仍需要使用本地 vLLM 部署，可通过 `python -m vllm.entrypoints.openai.api_server --model Qwen/Qwen3-4B --port 9097` 拉起服务，并将 `VLLM_BASE_URL` 指向 `http://localhost:9097/v1`。*
