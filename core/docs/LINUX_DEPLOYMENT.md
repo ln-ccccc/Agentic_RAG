@@ -49,7 +49,7 @@ conda create -n verl python=3.12 -y
 conda activate verl
 
 # 2. 安装特定版本的 PyTorch (verl 推荐 2.8.0 或更高版本)
-pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu124
+pip install torch --index-url https://download.pytorch.org/whl/cu124
 
 # 3. 安装 verl 源码
 cd verl

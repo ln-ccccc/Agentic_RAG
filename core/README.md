@@ -80,7 +80,7 @@ pip install -r requirements.txt
 # 环境 2: verl（GRPO 训练，与 agenticrag 严格隔离）
 conda create -n verl python=3.12
 conda activate verl
-pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+pip install torch --index-url https://download.pytorch.org/whl/cu128
 cd verl && pip install -e . && cd ..
 pip install -r requirements-verl.txt
 ```

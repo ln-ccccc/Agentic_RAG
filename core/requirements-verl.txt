@@ -1,7 +1,7 @@
 # ============================================================
 # 环境 2: verl — GRPO 训练 + vLLM 推理服务
 # conda create -n verl python=3.12
-# pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+# pip install torch --index-url https://download.pytorch.org/whl/cu128
 # pip install -r requirements-verl.txt
 # ============================================================
 
