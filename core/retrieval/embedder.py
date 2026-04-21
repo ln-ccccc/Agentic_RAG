@@ -13,7 +13,8 @@ _global_lock = Lock()  # 保护 _models/_locks 字典本身
 
 def _get_model(device: str = None):
     if device is None:
-        device = "cpu"
+        import torch
+        device = "cuda" if torch.cuda.is_available() else "cpu"
     with _global_lock:
         if device not in _models:
             from sentence_transformers import SentenceTransformer
