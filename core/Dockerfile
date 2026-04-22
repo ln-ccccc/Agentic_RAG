@@ -49,7 +49,7 @@ RUN conda create -n agenticrag python=3.11 -y --override-channels \
         -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r \
         -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free && \
     conda run -n agenticrag pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 && \
-    conda run -n agenticrag pip install -r requirements.txt && \
+    conda run -n agenticrag pip install --no-cache-dir -r requirements.txt && \
     conda clean -a -y
 
 # ---------------------------------------------------------
@@ -62,7 +62,7 @@ RUN conda create -n verl python=3.12 -y --override-channels \
     # 使用符合项目的 torch 版本
     conda run -n verl pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu124 || \
     conda run -n verl pip install torch --index-url https://download.pytorch.org/whl/cu124 && \
-    conda run -n verl pip install -r requirements-verl.txt && \
+    conda run -n verl pip install --no-cache-dir -r requirements-verl.txt && \
     conda clean -a -y
 
 # 将代码拷贝进容器（注：在使用 docker-compose 时，这层会被本地挂载覆盖，从而实现代码热更新）
